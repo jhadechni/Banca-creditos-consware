@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
+import 'package:prueba_tecnica_consware/app/util/notification.dart';
 import 'package:prueba_tecnica_consware/data/models/user.dart';
 import '../../../app/services/local_storage.dart';
 import '../../../domain/usecases/sign_up_use_case.dart';
@@ -7,6 +8,7 @@ import '../../../domain/usecases/sign_up_use_case.dart';
 class AuthController extends GetxController {
   AuthController(this._signUseCase);
   final SignUpUseCase _signUseCase;
+  NotificationBuilder notificationBuilder = NotificationBuilder();
   final store = Get.find<LocalStorageService>();
   var isLoggedIn = false.obs;
 
@@ -26,11 +28,11 @@ class AuthController extends GetxController {
         await store.storeData('logged', isLoggedIn);
         return Future.value(true);
       }
-      return Future.value(false);
+      throw 'Credenciales incorrectas';
     } catch (error) {
       logError(error);
-      Get.snackbar('Inicio de sesión', 'Inicio de sesión no exitoso');
       isLoggedIn.value = false;
+      notificationBuilder.showErrorSnackbar('Error', error.toString());
       return Future.value(false);
     }
   }
@@ -39,6 +41,8 @@ class AuthController extends GetxController {
     try {
       logInfo('Desde controlador ${user.toJson()}');
       await _signUseCase.execute(user);
+      await store.storeData('username', user.email);
+      await store.storeData('password', user.password);
       await logIn(user.email, user.password);
       return Future.value(true);
     } catch (error) {
@@ -58,7 +62,4 @@ class AuthController extends GetxController {
   Future<String> get getPassword async =>
       await store.retrieveData<String>('password') ?? '';
 
-  writeMessage(String message) {
-    logDebug(message);
-  }
 }

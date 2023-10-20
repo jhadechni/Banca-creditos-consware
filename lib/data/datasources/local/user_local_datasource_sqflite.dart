@@ -49,10 +49,10 @@ class UserLocalDataSource {
     logInfo(user.toJson());
   }
 
-  Future<User> getUser(String id) async {
+  Future<User> getUser(String email) async {
     final db = await database;
     List<Map<String, dynamic>> user =
-        await db.query("users", where: "id = ?", whereArgs: [id]);
+        await db.query("users", where: "email = ?", whereArgs: [email]);
     return User.fromJson(user[0]);
   }
 

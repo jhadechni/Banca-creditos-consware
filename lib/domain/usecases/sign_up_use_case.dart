@@ -10,7 +10,7 @@ class SignUpUseCase extends ParamUseCase<User, User> {
 
   @override
   Future<User> execute(User user) {
-    logInfo('Desde caso de uso ${user.toJson()}');
+    logInfo('caso de uso para user ${user.toJson()}');
     return _repo.signUp(user);
   }
 }

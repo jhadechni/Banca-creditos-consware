@@ -1,10 +1,10 @@
 import 'package:get/get.dart';
 import 'package:prueba_tecnica_consware/presentation/pages/bottom_navigation/bottom_navigation_page.dart';
-import 'package:prueba_tecnica_consware/presentation/pages/cotizacion/cotizacion_page.dart';
 import 'package:prueba_tecnica_consware/presentation/pages/login/login_page.dart';
 import 'package:prueba_tecnica_consware/presentation/pages/register/register_page.dart';
 import 'package:prueba_tecnica_consware/presentation/pages/sucefull_register/sucefull_register_page.dart';
 import 'package:prueba_tecnica_consware/presentation/reusables/loader.dart';
+
 
 appRoutes() => [
       GetPage(
@@ -37,10 +37,5 @@ appRoutes() => [
         transition: Transition.native,
         transitionDuration: const Duration(milliseconds: 500),
       ),
-      GetPage(
-        name: '/cotizacion',
-        page: () => const CotizacionPage(),
-        transition: Transition.native,
-        transitionDuration: const Duration(milliseconds: 500),
-      ),
+     
     ];

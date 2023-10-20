@@ -6,7 +6,11 @@ import 'package:prueba_tecnica_consware/app/util/dependency.dart';
 import 'presentation/app.dart';
 
 void main() async {
-  Loggy.initLoggy();
+   Loggy.initLoggy(
+    logPrinter: const PrettyPrinter(
+      showColors: true,
+    ),
+  );
   DependencyCreator.init();
   WidgetsFlutterBinding.ensureInitialized();
   await initServices();
