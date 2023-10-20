@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:prueba_tecnica_consware/app/util/colors.dart';
+import 'package:prueba_tecnica_consware/presentation/controllers/user/user_binding.dart';
 import 'package:prueba_tecnica_consware/presentation/pages/bottom_navigation/bottom_navigation_page.dart';
 import 'package:prueba_tecnica_consware/presentation/reusables/button.dart';
 
@@ -48,7 +49,10 @@ class SplashRegister extends StatelessWidget {
                       textColor: Colors.white,
                       width: MediaQuery.of(context).size.width * 0.9,
                       height: 50,
-                      onPressed: () => {Get.offAll(() => const NavBar())},
+                      onPressed: () => {
+                        Get.offAll(() => const NavBar()),
+                        UserBinding().dependencies()
+                      },
                     ))
               ],
             ),

@@ -1,30 +1,91 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:loggy/loggy.dart';
 import 'package:prueba_tecnica_consware/app/util/colors.dart';
+import 'package:prueba_tecnica_consware/app/util/currency_formatter.dart';
+import 'package:prueba_tecnica_consware/data/models/credito.dart';
+import 'package:prueba_tecnica_consware/data/models/user.dart';
+import 'package:prueba_tecnica_consware/presentation/controllers/user/user_controller.dart';
+import 'package:prueba_tecnica_consware/presentation/pages/cotizacion/cotizacion_page.dart';
 import 'package:prueba_tecnica_consware/presentation/reusables/button.dart';
 import 'package:prueba_tecnica_consware/presentation/reusables/dropbox.dart';
 import 'package:prueba_tecnica_consware/presentation/reusables/input.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  User user = User(name: '', email: '', password: '', identification: '');
+  TextEditingController tipoCredito = TextEditingController();
+  TextEditingController salario = TextEditingController();
+  TextEditingController meses = TextEditingController();
+  TextEditingController maxPrestamoCalculado = TextEditingController();
+
+  @override
+  initState() {
+    super.initState();
+    tipoCredito.text = 'Selecciona el tipo de crédito';
+    getUserInfo().then((value) => setState(() {
+          user = value;
+        }));
+
+    salario.addListener(() {
+      if (salario.text.isNotEmpty) {
+        try {
+          double credito =
+              ((int.parse(salario.text) * 7) / 0.15).roundToDouble();
+          maxPrestamoCalculado.text =
+              Formatter.formatNumberCOP(credito.toString());
+        } catch (e) {
+          salario.text = '';
+        }
+      } else {
+        maxPrestamoCalculado.text = '\$0';
+      }
+    });
+  }
+
+  Future<User> getUserInfo() async {
+    UserController userController = Get.find<UserController>();
+    String email = await userController.getLocalEmail;
+    User user = await userController.getUser(email);
+
+    return user;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    Credito credito;
+    double interestRate;
+    String monto;
+
+    double calcularTEA(double tasaMensual) {
+      return double.parse(
+          ((pow(1 + tasaMensual, 12) - 1) * 100).toStringAsPrecision(4));
+    }
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
         child: Column(
           children: [
-            const Padding(
-              padding: EdgeInsets.only(bottom: 33),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 33),
               child: Row(
                 children: [
                   Text(
-                    'Hola Jesús G.  👋',
-                    style: TextStyle(fontSize: 22),
+                    'Hola ${user.name}.  👋',
+                    style: const TextStyle(fontSize: 22),
                   ),
-                  Spacer(),
-                  Icon(Icons.notifications_on_outlined),
+                  const Spacer(),
+                  const Icon(Icons.notifications_on_outlined),
                 ],
               ),
             ),
@@ -43,16 +104,47 @@ class HomePage extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
                     child: IconButton(
-                      onPressed: () => {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (BuildContext context) => const CustomModal(
-                              maxLoan: '185.798.098,00',
-                              anualInterestRate: 43.26,
-                              monthlyInterestRate: 3.04,
-                              totalValue: 950,
-                              monthlyFee: 1112501),
-                        )},
+                      onPressed: () async => {
+                        if (formKey.currentState!.validate())
+                          {
+                            interestRate =
+                                tipoCredito.text == 'Crédito de vehículo'
+                                    ? 0.03
+                                    : tipoCredito.text == 'Crédito de vivienda'
+                                        ? 0.01
+                                        : 0.035,
+                            monto = ((double.parse(Formatter.unFormatNumberCOP(maxPrestamoCalculado.text) ) *
+                                        interestRate) /
+                                    (1 -
+                                        pow(1 + interestRate,
+                                            -int.parse(meses.text))))
+                                .toString(),
+                            credito = Credito(
+                              tipoCredito: tipoCredito.text,
+                              anualInterest: calcularTEA(interestRate),
+                              term: int.parse(meses.text),
+                              salarioBase: salario.text,
+                              maximoPrestamo: maxPrestamoCalculado.text,
+                              cuotaCredito:
+                                  Formatter.formatNumberCOP(monto.toString()),
+                              idUsuario: user.id.toString(),
+                            ),
+                            logDebug('Credito: ${credito.toJson()}'),
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (BuildContext context) => CustomModal(
+                                  maxLoan: credito.cuotaCredito,
+                                  anualInterestRate: calcularTEA(interestRate),
+                                  monthlyInterestRate: double.parse(
+                                      (interestRate * 100).toStringAsFixed(2)),
+                                  totalValue: credito.maximoPrestamo,
+                                  monthlyFee: (double.parse(
+                                          Formatter.unFormatNumberCOP(
+                                              credito.cuotaCredito)) *
+                                      int.parse(meses.text))),
+                            )
+                          },
+                      },
                       icon: const Icon(Icons.info_outline),
                       color: Palette.kPrimaryColor,
                     ),
@@ -67,69 +159,142 @@ class HomePage extends StatelessWidget {
                 style: TextStyle(fontSize: 18),
               ),
             ),
-            CustomDropdown(
-              items: const [
-                'Crédito de vehículo',
-                'Crédito de vivienda',
-                'Crédito de libre inversión'
-              ],
-              placeholder: 'Selecciona el tipo de crédito',
-              width: MediaQuery.of(context).size.width * 0.87,
-              label: '¿Qué tipo de créditos deseas realizar?',
-            ),
-            Column(
-              children: [
-                CustomInput(
-                  placeholder: '\$1´000.000,00',
-                  controller: TextEditingController(),
-                  width: MediaQuery.of(context).size.width * 0.87,
-                  height: 40,
-                  labelText: '¿Cúal es tu salario base?',
-                  textColor: Colors.black,
-                  fontSize: 14,
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(left: 20),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Digíta tu salario para calcular el préstamo que necesitas',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF525B64)),
-                    ),
+            Form(
+              key: formKey,
+              child: Column(
+                children: [
+                  CustomDropdown(
+                    items: const [
+                      'Crédito de vehículo',
+                      'Crédito de vivienda',
+                      'Crédito de libre inversión'
+                    ],
+                    placeholder: 'Selecciona el tipo de crédito',
+                    hintText: tipoCredito.text,
+                    width: MediaQuery.of(context).size.width * 0.84,
+                    label: '¿Qué tipo de créditos deseas realizar?',
+                    onChanged: (value) => {
+                      setState(() {
+                        tipoCredito.text = value;
+                      })
+                    },
                   ),
-                )
-              ],
-            ),
-            CustomInput(
-              placeholder: '\$0',
-              controller: TextEditingController(),
-              width: MediaQuery.of(context).size.width * 0.87,
-              height: 40,
-              enabled: false,
-              backgroundColor: const Color(0xFFE0E0E0),
-            ),
-            Column(
-              children: [
-                CustomInput(
-                  placeholder: '48',
-                  controller: TextEditingController(),
-                  width: MediaQuery.of(context).size.width * 0.87,
-                  height: 40,
-                  labelText: '¿A cuántos meses?',
-                  textColor: Colors.black,
-                  fontSize: 14,
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(left: 20),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Elige un plazo desde 12 hata 84 meses',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF525B64)),
-                    ),
+                  Column(
+                    children: [
+                      CustomInput(
+                        placeholder: '\$1´000.000,00',
+                        controller: salario,
+                        width: MediaQuery.of(context).size.width * 0.87,
+                        height: 40,
+                        labelText: '¿Cúal es tu salario base?',
+                        textColor: Colors.black,
+                        customValidator: (value) {
+                          if (value.isEmpty) {
+                            Get.snackbar(
+                              'Info',
+                              'Debe ingresar su salario base',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Palette.kGray,
+                              colorText: Colors.black,
+                            );
+                            return 'Este campo es obligatorio';
+                          } else if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
+                            Get.snackbar(
+                              'Info',
+                              'Ingrese solo números',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Palette.kGray,
+                              colorText: Colors.black,
+                            );
+                          }
+                        },
+                        fontSize: 14,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 20),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Digíta tu salario para calcular el préstamo que necesitas',
+                            style: TextStyle(
+                                fontSize: 12, color: Color(0xFF525B64)),
+                          ),
+                        ),
+                      )
+                    ],
                   ),
-                )
-              ],
+                  CustomInput(
+                    placeholder: '\$0',
+                    controller: maxPrestamoCalculado,
+                    width: MediaQuery.of(context).size.width * 0.87,
+                    height: 40,
+                    enabled: false,
+                    customValidator: (value) {
+                      if (value.isEmpty) {
+                        return null;
+                      }
+                      return null;
+                    },
+                    backgroundColor: const Color(0xFFE0E0E0),
+                  ),
+                  Column(
+                    children: [
+                      CustomInput(
+                        placeholder: '48',
+                        controller: meses,
+                        width: MediaQuery.of(context).size.width * 0.87,
+                        height: 40,
+                        labelText: '¿A cuántos meses?',
+                        textColor: Colors.black,
+                        fontSize: 14,
+                        customValidator: (value) {
+                          if (value.isEmpty) {
+                            Get.snackbar(
+                              'Info',
+                              'Debe ingresar un plazo',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Palette.kGray,
+                              colorText: Colors.black,
+                            );
+                            return 'Este campo es obligatorio';
+                          } else if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
+                            Get.snackbar(
+                              'Info',
+                              'Ingrese solo números',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Palette.kGray,
+                              colorText: Colors.black,
+                            );
+                          } else if (int.parse(value) < 12 ||
+                              int.parse(value) > 84) {
+                            Get.snackbar(
+                              'Info',
+                              'El plazo debe ser entre 12 y 84 meses',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Palette.kGray,
+                              colorText: Colors.black,
+                            );
+                            return 'El plazo debe ser entre 12 y 84 meses';
+                          }
+
+                          return null;
+                        },
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 20),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Elige un plazo desde 12 hata 84 meses',
+                            style: TextStyle(
+                                fontSize: 12, color: Color(0xFF525B64)),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 45),
@@ -139,7 +304,37 @@ class HomePage extends StatelessWidget {
                   textColor: Colors.white,
                   width: MediaQuery.of(context).size.width * 0.92,
                   height: 40,
-                  onPressed: () => {Get.toNamed('/cotizacion')}),
+                  onPressed: () => {
+                        if (formKey.currentState!.validate())
+                          {
+                            interestRate =
+                                tipoCredito.text == 'Crédito de vehículo'
+                                    ? 0.03
+                                    : tipoCredito.text == 'Crédito de vivienda'
+                                        ? 0.01
+                                        : 0.035,
+                            monto = ((double.parse(Formatter.unFormatNumberCOP(
+                                            maxPrestamoCalculado.text)) *
+                                        interestRate) /
+                                    (1 -
+                                        pow(1 + interestRate,
+                                            -int.parse(meses.text))))
+                                .toString(),
+                            credito = Credito(
+                              tipoCredito: tipoCredito.text,
+                              anualInterest: calcularTEA(interestRate),
+                              term: int.parse(meses.text),
+                              salarioBase: salario.text,
+                              maximoPrestamo: maxPrestamoCalculado.text,
+                              cuotaCredito:
+                                  Formatter.formatNumberCOP(monto.toString()),
+                              idUsuario: user.id.toString(),
+                            ),
+                            Get.to(() =>
+                                CotizacionPage(credito: credito, user: user)),
+                            logDebug('Credito: ${credito.toJson()}'),
+                          }
+                      }),
             )
           ],
         ),
@@ -152,7 +347,7 @@ class CustomModal extends StatelessWidget {
   final String maxLoan;
   final double anualInterestRate;
   final double monthlyInterestRate;
-  final double totalValue;
+  final String totalValue;
   final double monthlyFee;
 
   const CustomModal({
@@ -196,7 +391,7 @@ class CustomModal extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        "\$$maxLoan",
+                        maxLoan,
                         style: const TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
@@ -248,8 +443,8 @@ class CustomModal extends StatelessWidget {
               text2: '$monthlyInterestRate%',
             ),
             ModalItems(
-              text1: 'Tasa Efectiva Anual desde',
-              text2: '\$$totalValue',
+              text1: 'Valor total del préstamo',
+              text2: totalValue,
             ),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
@@ -270,7 +465,7 @@ class CustomModal extends StatelessWidget {
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  Text('\$${monthlyFee}',
+                  Text(Formatter.formatNumberCOP(monthlyFee.toString()),
                       style: const TextStyle(
                           fontSize: 16,
                           color: Colors.black,

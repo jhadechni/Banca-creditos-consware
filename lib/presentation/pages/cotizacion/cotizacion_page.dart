@@ -1,54 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:prueba_tecnica_consware/app/util/colors.dart';
+import 'package:prueba_tecnica_consware/app/util/create_excel.dart';
+import 'package:prueba_tecnica_consware/app/util/currency_formatter.dart';
+import 'package:prueba_tecnica_consware/app/util/generate_amortization_table.dart';
+import 'package:prueba_tecnica_consware/data/models/credito.dart';
+import 'package:prueba_tecnica_consware/data/models/user.dart';
+import 'package:prueba_tecnica_consware/presentation/controllers/user/user_controller.dart';
 import 'package:prueba_tecnica_consware/presentation/reusables/button.dart';
 import 'package:prueba_tecnica_consware/presentation/reusables/table.dart';
 
 class CotizacionPage extends StatelessWidget {
-  const CotizacionPage({super.key});
+  final Credito credito;
+  final User user;
+  const CotizacionPage({super.key, required this.credito, required this.user});
 
   @override
   Widget build(BuildContext context) {
+    List<List<String>> eliminarCampo(
+        List<List<String>> tabla, int indiceCampo) {
+      for (int i = 0; i < tabla.length; i++) {
+        if (indiceCampo < tabla[i].length) {
+          tabla[i].removeAt(indiceCampo);
+        }
+      }
+      return tabla;
+    }
+
     return Scaffold(
-        body: Padding(
-      padding: const EdgeInsets.only(top: 50),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: SizedBox(
-                  width: 50,
-                  height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(100),
+        body: SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 50),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: SizedBox(
+                    width: 50,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        elevation: 6,
+                        shadowColor: Colors.black,
                       ),
-                      elevation: 6,
-                      shadowColor: Colors.black,
-                    ),
-                    onPressed: () {
-                      // Close the modal
-                      Get.back();
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 3),
-                      child: Icon(
-                        Icons.arrow_back_ios,
-                        color: Palette.kPrimaryColor,
-                        size: 20,
+                      onPressed: () {
+                        // Close the modal
+                        Get.back();
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 3),
+                        child: Icon(
+                          Icons.arrow_back_ios,
+                          color: Palette.kPrimaryColor,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              )
-            ],
-          ),
-          SingleChildScrollView(
-            child: Padding(
+                )
+              ],
+            ),
+            Padding(
               padding: const EdgeInsets.only(left: 16, right: 16, top: 30),
               child: Column(
                 children: [
@@ -100,28 +118,22 @@ class CotizacionPage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 17, bottom: 21),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 17, bottom: 21),
                     child: CustomTable(
-                      rowNames: [
+                      rowNames: const [
                         'No. Cuota',
                         'Valor de cuota',
                         'Interés',
                         'Abono a capital'
                       ],
-                      data: [
-                        ['1', '20', '10', 'abono'],
-                        ['1', '20', '10', 'abono'],
-                        ['1', '20', '10', 'abono'],
-                        ['1', '20', '10', 'abono'],
-                        ['1', '20', '10', 'abono'],
-                        ['1', '20', '10', 'abono'],
-                        ['1', '20', '10', 'abono'],
-                        ['1', '20', '10', 'abono'],
-                        ['1', '20', '10', 'abono'],
-                        ['1', '20', '10', 'abono'],
-                      ],
-                      columnTextColors: [
+                      data: eliminarCampo(
+                          generateAmortizationTable(
+                              loanAmount: double.parse(Formatter.unFormatNumberCOP(credito.maximoPrestamo)),
+                              annualInterestRate: credito.anualInterest,
+                              loanTermInMonths: credito.term),
+                          4),
+                      columnTextColors: const [
                         Colors.black,
                         Palette.kGray,
                         Colors.black,
@@ -135,7 +147,12 @@ class CotizacionPage extends StatelessWidget {
                       textColor: Colors.white,
                       width: MediaQuery.of(context).size.width * 0.92,
                       height: 50,
-                      onPressed: () => {}),
+                      onPressed: () => {
+                            createExcel(generateAmortizationTable(
+                              loanAmount: double.parse(Formatter.unFormatNumberCOP(credito.maximoPrestamo)),
+                              annualInterestRate: credito.anualInterest,
+                              loanTermInMonths: credito.term))
+                          }),
                   Padding(
                     padding: const EdgeInsets.only(top: 9),
                     child: CustomButton(
@@ -149,42 +166,36 @@ class CotizacionPage extends StatelessWidget {
                               showModalBottomSheet(
                                   context: context,
                                   builder: (BuildContext context) =>
-                                      const CustomModal(
-                                          maxLoan: '185.798.098,00',
-                                          anualInterestRate: 43.26,
-                                          monthlyInterestRate: 3.04,
-                                          totalValue: 950,
-                                          monthlyFee: 1112501))
+                                      CustomModal(
+                                        credito: credito,
+                                        user: user,
+                                      ))
                             }),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ));
   }
 }
 
 class CustomModal extends StatelessWidget {
-  final String maxLoan;
-  final double anualInterestRate;
-  final double monthlyInterestRate;
-  final double totalValue;
-  final double monthlyFee;
+  final Credito credito;
+  final User user;
 
   const CustomModal({
     Key? key,
-    required this.maxLoan,
-    required this.anualInterestRate,
-    required this.monthlyInterestRate,
-    required this.totalValue,
-    required this.monthlyFee,
+    required this.credito,
+    required this.user,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    UserController userController = Get.find<UserController>();
+
     return Padding(
       padding: const EdgeInsets.only(top: 18.0),
       child: Container(
@@ -271,7 +282,11 @@ class CustomModal extends StatelessWidget {
                           textColor: Colors.white,
                           width: MediaQuery.of(context).size.width * 0.9,
                           height: 40,
-                          onPressed: () => {}),
+                          onPressed: () => {
+                                // Close the modal
+                                userController.saveCredito(credito, user),
+                                Navigator.of(context).pop()
+                              }),
                       Padding(
                         padding: const EdgeInsets.only(top: 9.0),
                         child: CustomButton(
@@ -281,7 +296,10 @@ class CustomModal extends StatelessWidget {
                             width: MediaQuery.of(context).size.width * 0.9,
                             borderColor: Palette.kPrimaryColor,
                             height: 40,
-                            onPressed: () => {}),
+                            onPressed: () => {
+                                  // Close the modal
+                                  Navigator.of(context).pop()
+                                }),
                       ),
                     ],
                   ),

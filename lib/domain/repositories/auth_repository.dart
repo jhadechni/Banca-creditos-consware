@@ -1,5 +1,6 @@
-import '../entities/user.dart';
+
+import 'package:prueba_tecnica_consware/data/models/user.dart';
 
 abstract class AuthenticationRepository {
-  Future<User> signUp(String username);
+  Future<User> signUp(User user);
 }
