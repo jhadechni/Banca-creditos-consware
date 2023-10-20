@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loggy/loggy.dart';
 
 class CustomDropdown extends StatefulWidget {
   final String? selectedValue;
@@ -8,12 +9,14 @@ class CustomDropdown extends StatefulWidget {
   final double width;
   final double height;
   final String? label;
+  final String? hintText;
 
   const CustomDropdown(
       {super.key,
       required this.items,
       required this.placeholder,
       this.selectedValue,
+      this.hintText,
       this.onChanged,
       this.width = 200.0,
       this.height = 40.0,
@@ -53,11 +56,12 @@ class _CustomDropdownState extends State<CustomDropdown> {
                 Expanded(
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
-                      value: widget.selectedValue,
-                      hint: Text(widget.placeholder),
+                      value: widget.selectedValue ,
+                      hint: Text(widget.hintText ?? ''),
                       onChanged: (newValue) {
                         setState(() {
                           widget.onChanged?.call(newValue!);
+                          logInfo('selected value $newValue');
                         });
                       },
                       items: widget.items.map<DropdownMenuItem<String>>(
