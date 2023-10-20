@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:prueba_tecnica_consware/app/util/colors.dart';
+import 'package:prueba_tecnica_consware/presentation/controllers/user/user_controller.dart';
 import 'package:prueba_tecnica_consware/presentation/pages/historial/historial_page.dart';
 import 'package:prueba_tecnica_consware/presentation/pages/home/home_page.dart';
 
@@ -15,6 +17,10 @@ class _NavBarState extends State<NavBar> {
 
   @override
   Widget build(BuildContext context) {
+    UserController userController = Get.find<UserController>();
+    String email = '';
+    userController.getLocalEmail.then((value) => email = value);
+
     return Scaffold(
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
@@ -46,7 +52,10 @@ class _NavBarState extends State<NavBar> {
       ),
       body: <Widget>[
         const SafeArea(child: HomePage()),
-         SafeArea(child: HistorialPage(email: 'jaime@jaime.com',))
+        SafeArea(
+            child: HistorialPage(
+          email: email,
+        ))
       ][currentPageIndex],
     );
   }
