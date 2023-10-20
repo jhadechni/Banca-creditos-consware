@@ -18,7 +18,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       initialRoute: "/",
-      initialBinding: UserBinding(),
+      initialBinding: AuthBinding(),
       title: 'Banca Creditos',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -26,7 +26,7 @@ class App extends StatelessWidget {
           primarySwatch: Colors.indigo,
           fontFamily: 'ProductSans'),
       //home: const NavBar(),
-      home: NavBar(),
+      home: const LoginPage(),
       getPages: appRoutes(),
     );
   }
