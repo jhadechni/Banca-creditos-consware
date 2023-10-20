@@ -10,10 +10,9 @@ import 'package:prueba_tecnica_consware/presentation/controllers/user/user_contr
 import 'package:prueba_tecnica_consware/presentation/reusables/button.dart';
 import 'package:prueba_tecnica_consware/presentation/reusables/table.dart';
 
-class CotizacionPage extends StatelessWidget {
+class CotizacionPageNoUser extends StatelessWidget {
   final Credito credito;
-  final User user;
-  const CotizacionPage({super.key, required this.credito, required this.user});
+  const CotizacionPageNoUser({super.key, required this.credito});
 
   @override
   Widget build(BuildContext context) {
@@ -153,25 +152,7 @@ class CotizacionPage extends StatelessWidget {
                               annualInterestRate: credito.anualInterest,
                               loanTermInMonths: int.parse(credito.term)))
                           }),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 9),
-                    child: CustomButton(
-                        text: 'Guardar cotización',
-                        color: Colors.white,
-                        textColor: Palette.kPrimaryColor,
-                        width: MediaQuery.of(context).size.width * 0.92,
-                        height: 50,
-                        borderColor: Palette.kPrimaryColor,
-                        onPressed: () => {
-                              showModalBottomSheet(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      CustomModal(
-                                        credito: credito,
-                                        user: user,
-                                      ))
-                            }),
-                  ),
+                  
                 ],
               ),
             ),
@@ -182,133 +163,3 @@ class CotizacionPage extends StatelessWidget {
   }
 }
 
-class CustomModal extends StatelessWidget {
-  final Credito credito;
-  final User user;
-
-  const CustomModal({
-    Key? key,
-    required this.credito,
-    required this.user,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    UserController userController = Get.find<UserController>();
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 18.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius:
-              BorderRadius.circular(20), // Adjust the radius as needed
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: SizedBox(
-                      width: 50,
-                      height: 50,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                          elevation: 6,
-                          shadowColor: Colors.black,
-                        ),
-                        onPressed: () {
-                          // Close the modal
-                          Navigator.of(context).pop();
-                        },
-                        child: const Icon(
-                          Icons.close,
-                          color: Palette.kPrimaryColor,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const SizedBox(
-                          width: 70,
-                          height: 70,
-                          child: Image(
-                              image:
-                                  AssetImage('assets/images/info-circle.png'))),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20, bottom: 12),
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.8,
-                          child: const Text(
-                            '¿Está seguro que desea Guardar la cotización?',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 22,
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 37),
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.7,
-                          child: const Text(
-                            'La cotización realizada la podrás consultar en tu historial de créditos.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 14, color: Color(0xFF525B64)),
-                          ),
-                        ),
-                      ),
-                      CustomButton(
-                          text: 'Guardar',
-                          color: Palette.kPrimaryColor,
-                          textColor: Colors.white,
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          height: 40,
-                          onPressed: () => {
-                                // Close the modal
-                                userController.saveCredito(credito, user),
-                                Navigator.of(context).pop()
-                              }),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 9.0),
-                        child: CustomButton(
-                            text: 'Cancelar',
-                            color: Colors.white,
-                            textColor: Palette.kPrimaryColor,
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            borderColor: Palette.kPrimaryColor,
-                            height: 40,
-                            onPressed: () => {
-                                  // Close the modal
-                                  Navigator.of(context).pop()
-                                }),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

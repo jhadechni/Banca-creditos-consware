@@ -12,9 +12,10 @@ Credito _$CreditoFromJson(Map<String, dynamic> json) => Credito(
       salarioBase: json['salarioBase'] as String,
       maximoPrestamo: json['maximoPrestamo'] as String,
       cuotaCredito: json['cuotaCredito'] as String,
-      anualInterest: (json['anualInterest'] as num).toDouble(),
-      term: json['term'] as int,
-      idUsuario: json['idUsuario'] as String,
+      anualInterest: (double.parse(json['anualInterest']) as num).toDouble(),
+      term: json['term'] as String,
+      email: json['email'] as String,
+      fecha: json['fecha'] as String,
     );
 
 Map<String, dynamic> _$CreditoToJson(Credito instance) => <String, dynamic>{
@@ -25,5 +26,6 @@ Map<String, dynamic> _$CreditoToJson(Credito instance) => <String, dynamic>{
       'cuotaCredito': instance.cuotaCredito,
       'anualInterest': instance.anualInterest,
       'term': instance.term,
-      'idUsuario': instance.idUsuario,
+      'email': instance.email,
+      'fecha': instance.fecha,
     };

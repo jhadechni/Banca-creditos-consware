@@ -72,271 +72,280 @@ class _HomePageState extends State<HomePage> {
     }
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 33),
-              child: Row(
-                children: [
-                  Text(
-                    'Hola ${user.name}.  👋',
-                    style: const TextStyle(fontSize: 22),
-                  ),
-                  const Spacer(),
-                  const Icon(Icons.notifications_on_outlined),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Simulador de crédito',
-                    style: TextStyle(
-                        fontSize: 25,
-                        color: Palette.kPrimaryColor,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: IconButton(
-                      onPressed: () async => {
-                        if (formKey.currentState!.validate())
-                          {
-                            interestRate =
-                                tipoCredito.text == 'Crédito de vehículo'
-                                    ? 0.03
-                                    : tipoCredito.text == 'Crédito de vivienda'
-                                        ? 0.01
-                                        : 0.035,
-                            monto = ((double.parse(Formatter.unFormatNumberCOP(maxPrestamoCalculado.text) ) *
-                                        interestRate) /
-                                    (1 -
-                                        pow(1 + interestRate,
-                                            -int.parse(meses.text))))
-                                .toString(),
-                            credito = Credito(
-                              tipoCredito: tipoCredito.text,
-                              anualInterest: calcularTEA(interestRate),
-                              term: int.parse(meses.text),
-                              salarioBase: salario.text,
-                              maximoPrestamo: maxPrestamoCalculado.text,
-                              cuotaCredito:
-                                  Formatter.formatNumberCOP(monto.toString()),
-                              idUsuario: user.id.toString(),
-                            ),
-                            logDebug('Credito: ${credito.toJson()}'),
-                            showModalBottomSheet(
-                              context: context,
-                              builder: (BuildContext context) => CustomModal(
-                                  maxLoan: credito.cuotaCredito,
-                                  anualInterestRate: calcularTEA(interestRate),
-                                  monthlyInterestRate: double.parse(
-                                      (interestRate * 100).toStringAsFixed(2)),
-                                  totalValue: credito.maximoPrestamo,
-                                  monthlyFee: (double.parse(
-                                          Formatter.unFormatNumberCOP(
-                                              credito.cuotaCredito)) *
-                                      int.parse(meses.text))),
-                            )
-                          },
-                      },
-                      icon: const Icon(Icons.info_outline),
-                      color: Palette.kPrimaryColor,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 33),
+                child: Row(
+                  children: [
+                    Text(
+                      'Hola ${user.name}.  👋',
+                      style: const TextStyle(fontSize: 22),
                     ),
-                  ),
-                ],
+                    const Spacer(),
+                    const Icon(Icons.notifications_on_outlined),
+                  ],
+                ),
               ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(bottom: 18),
-              child: Text(
-                'Ingresa los datos para tu crédito según lo que necesites.',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-            Form(
-              key: formKey,
-              child: Column(
-                children: [
-                  CustomDropdown(
-                    items: const [
-                      'Crédito de vehículo',
-                      'Crédito de vivienda',
-                      'Crédito de libre inversión'
-                    ],
-                    placeholder: 'Selecciona el tipo de crédito',
-                    hintText: tipoCredito.text,
-                    width: MediaQuery.of(context).size.width * 0.84,
-                    label: '¿Qué tipo de créditos deseas realizar?',
-                    onChanged: (value) => {
-                      setState(() {
-                        tipoCredito.text = value;
-                      })
-                    },
-                  ),
-                  Column(
-                    children: [
-                      CustomInput(
-                        placeholder: '\$1´000.000,00',
-                        controller: salario,
-                        width: MediaQuery.of(context).size.width * 0.87,
-                        height: 40,
-                        labelText: '¿Cúal es tu salario base?',
-                        textColor: Colors.black,
-                        customValidator: (value) {
-                          if (value.isEmpty) {
-                            Get.snackbar(
-                              'Info',
-                              'Debe ingresar su salario base',
-                              snackPosition: SnackPosition.BOTTOM,
-                              backgroundColor: Palette.kGray,
-                              colorText: Colors.black,
-                            );
-                            return 'Este campo es obligatorio';
-                          } else if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
-                            Get.snackbar(
-                              'Info',
-                              'Ingrese solo números',
-                              snackPosition: SnackPosition.BOTTOM,
-                              backgroundColor: Palette.kGray,
-                              colorText: Colors.black,
-                            );
-                          }
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Simulador de crédito',
+                      style: TextStyle(
+                          fontSize: 25,
+                          color: Palette.kPrimaryColor,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: IconButton(
+                        onPressed: () async => {
+                          if (formKey.currentState!.validate())
+                            {
+                              interestRate = tipoCredito.text ==
+                                      'Crédito de vehículo'
+                                  ? 0.03
+                                  : tipoCredito.text == 'Crédito de vivienda'
+                                      ? 0.01
+                                      : 0.035,
+                              monto = ((double.parse(
+                                              Formatter.unFormatNumberCOP(
+                                                  maxPrestamoCalculado.text)) *
+                                          interestRate) /
+                                      (1 -
+                                          pow(1 + interestRate,
+                                              -int.parse(meses.text))))
+                                  .toString(),
+                              credito = Credito(
+                                tipoCredito: tipoCredito.text,
+                                anualInterest: calcularTEA(interestRate),
+                                term: meses.text,
+                                salarioBase: salario.text,
+                                maximoPrestamo: maxPrestamoCalculado.text,
+                                fecha: Formatter.formatDate(DateTime.now()),
+                                cuotaCredito:
+                                    Formatter.formatNumberCOP(monto.toString()),
+                                email: user.email,
+                              ),
+                              logDebug('Credito: ${credito.toJson()}'),
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) => CustomModal(
+                                    maxLoan: credito.cuotaCredito,
+                                    anualInterestRate:
+                                        calcularTEA(interestRate),
+                                    monthlyInterestRate: double.parse(
+                                        (interestRate * 100)
+                                            .toStringAsFixed(2)),
+                                    totalValue: credito.maximoPrestamo,
+                                    monthlyFee: (double.parse(
+                                            Formatter.unFormatNumberCOP(
+                                                credito.cuotaCredito)) *
+                                        int.parse(meses.text))),
+                              )
+                            },
                         },
-                        fontSize: 14,
+                        icon: const Icon(Icons.info_outline),
+                        color: Palette.kPrimaryColor,
                       ),
-                      const Padding(
-                        padding: EdgeInsets.only(left: 20),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Digíta tu salario para calcular el préstamo que necesitas',
-                            style: TextStyle(
-                                fontSize: 12, color: Color(0xFF525B64)),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                  CustomInput(
-                    placeholder: '\$0',
-                    controller: maxPrestamoCalculado,
-                    width: MediaQuery.of(context).size.width * 0.87,
-                    height: 40,
-                    enabled: false,
-                    customValidator: (value) {
-                      if (value.isEmpty) {
-                        return null;
-                      }
-                      return null;
-                    },
-                    backgroundColor: const Color(0xFFE0E0E0),
-                  ),
-                  Column(
-                    children: [
-                      CustomInput(
-                        placeholder: '48',
-                        controller: meses,
-                        width: MediaQuery.of(context).size.width * 0.87,
-                        height: 40,
-                        labelText: '¿A cuántos meses?',
-                        textColor: Colors.black,
-                        fontSize: 14,
-                        customValidator: (value) {
-                          if (value.isEmpty) {
-                            Get.snackbar(
-                              'Info',
-                              'Debe ingresar un plazo',
-                              snackPosition: SnackPosition.BOTTOM,
-                              backgroundColor: Palette.kGray,
-                              colorText: Colors.black,
-                            );
-                            return 'Este campo es obligatorio';
-                          } else if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
-                            Get.snackbar(
-                              'Info',
-                              'Ingrese solo números',
-                              snackPosition: SnackPosition.BOTTOM,
-                              backgroundColor: Palette.kGray,
-                              colorText: Colors.black,
-                            );
-                          } else if (int.parse(value) < 12 ||
-                              int.parse(value) > 84) {
-                            Get.snackbar(
-                              'Info',
-                              'El plazo debe ser entre 12 y 84 meses',
-                              snackPosition: SnackPosition.BOTTOM,
-                              backgroundColor: Palette.kGray,
-                              colorText: Colors.black,
-                            );
-                            return 'El plazo debe ser entre 12 y 84 meses';
-                          }
-
-                          return null;
-                        },
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.only(left: 20),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Elige un plazo desde 12 hata 84 meses',
-                            style: TextStyle(
-                                fontSize: 12, color: Color(0xFF525B64)),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 45),
-              child: CustomButton(
-                  text: 'Simular',
-                  color: Palette.kPrimaryColor,
-                  textColor: Colors.white,
-                  width: MediaQuery.of(context).size.width * 0.92,
-                  height: 40,
-                  onPressed: () => {
-                        if (formKey.currentState!.validate())
-                          {
-                            interestRate =
-                                tipoCredito.text == 'Crédito de vehículo'
-                                    ? 0.03
-                                    : tipoCredito.text == 'Crédito de vivienda'
-                                        ? 0.01
-                                        : 0.035,
-                            monto = ((double.parse(Formatter.unFormatNumberCOP(
-                                            maxPrestamoCalculado.text)) *
-                                        interestRate) /
-                                    (1 -
-                                        pow(1 + interestRate,
-                                            -int.parse(meses.text))))
-                                .toString(),
-                            credito = Credito(
-                              tipoCredito: tipoCredito.text,
-                              anualInterest: calcularTEA(interestRate),
-                              term: int.parse(meses.text),
-                              salarioBase: salario.text,
-                              maximoPrestamo: maxPrestamoCalculado.text,
-                              cuotaCredito:
-                                  Formatter.formatNumberCOP(monto.toString()),
-                              idUsuario: user.id.toString(),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 18),
+                child: Text(
+                  'Ingresa los datos para tu crédito según lo que necesites.',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+              Form(
+                key: formKey,
+                child: Column(
+                  children: [
+                    CustomDropdown(
+                      items: const [
+                        'Crédito de vehículo',
+                        'Crédito de vivienda',
+                        'Crédito de libre inversión'
+                      ],
+                      placeholder: 'Selecciona el tipo de crédito',
+                      hintText: tipoCredito.text,
+                      width: MediaQuery.of(context).size.width * 0.84,
+                      label: '¿Qué tipo de créditos deseas realizar?',
+                      onChanged: (value) => {
+                        setState(() {
+                          tipoCredito.text = value;
+                        })
+                      },
+                    ),
+                    Column(
+                      children: [
+                        CustomInput(
+                          placeholder: '\$1´000.000,00',
+                          controller: salario,
+                          width: MediaQuery.of(context).size.width * 0.87,
+                          height: 40,
+                          labelText: '¿Cúal es tu salario base?',
+                          textColor: Colors.black,
+                          customValidator: (value) {
+                            if (value.isEmpty) {
+                              Get.snackbar(
+                                'Info',
+                                'Debe ingresar su salario base',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Palette.kGray,
+                                colorText: Colors.black,
+                              );
+                              return 'Este campo es obligatorio';
+                            } else if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
+                              Get.snackbar(
+                                'Info',
+                                'Ingrese solo números',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Palette.kGray,
+                                colorText: Colors.black,
+                              );
+                            }
+                          },
+                          fontSize: 14,
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 20),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Digíta tu salario para calcular el préstamo que necesitas',
+                              style: TextStyle(
+                                  fontSize: 12, color: Color(0xFF525B64)),
                             ),
-                            Get.to(() =>
-                                CotizacionPage(credito: credito, user: user)),
-                            logDebug('Credito: ${credito.toJson()}'),
-                          }
-                      }),
-            )
-          ],
+                          ),
+                        )
+                      ],
+                    ),
+                    CustomInput(
+                      placeholder: '\$0',
+                      controller: maxPrestamoCalculado,
+                      width: MediaQuery.of(context).size.width * 0.87,
+                      height: 40,
+                      enabled: false,
+                      customValidator: (value) {
+                        if (value.isEmpty) {
+                          return null;
+                        }
+                        return null;
+                      },
+                      backgroundColor: const Color(0xFFE0E0E0),
+                    ),
+                    Column(
+                      children: [
+                        CustomInput(
+                          placeholder: '48',
+                          controller: meses,
+                          width: MediaQuery.of(context).size.width * 0.87,
+                          height: 40,
+                          labelText: '¿A cuántos meses?',
+                          textColor: Colors.black,
+                          fontSize: 14,
+                          customValidator: (value) {
+                            if (value.isEmpty) {
+                              Get.snackbar(
+                                'Info',
+                                'Debe ingresar un plazo',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Palette.kGray,
+                                colorText: Colors.black,
+                              );
+                              return 'Este campo es obligatorio';
+                            } else if (!RegExp(r'^[0-9]*$').hasMatch(value)) {
+                              Get.snackbar(
+                                'Info',
+                                'Ingrese solo números',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Palette.kGray,
+                                colorText: Colors.black,
+                              );
+                            } else if (int.parse(value) < 12 ||
+                                int.parse(value) > 84) {
+                              Get.snackbar(
+                                'Info',
+                                'El plazo debe ser entre 12 y 84 meses',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Palette.kGray,
+                                colorText: Colors.black,
+                              );
+                              return 'El plazo debe ser entre 12 y 84 meses';
+                            }
+
+                            return null;
+                          },
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 20),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Elige un plazo desde 12 hata 84 meses',
+                              style: TextStyle(
+                                  fontSize: 12, color: Color(0xFF525B64)),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 45),
+                child: CustomButton(
+                    text: 'Simular',
+                    color: Palette.kPrimaryColor,
+                    textColor: Colors.white,
+                    width: MediaQuery.of(context).size.width * 0.92,
+                    height: 40,
+                    onPressed: () => {
+                          if (formKey.currentState!.validate())
+                            {
+                              interestRate = tipoCredito.text ==
+                                      'Crédito de vehículo'
+                                  ? 0.03
+                                  : tipoCredito.text == 'Crédito de vivienda'
+                                      ? 0.01
+                                      : 0.035,
+                              monto = ((double.parse(
+                                              Formatter.unFormatNumberCOP(
+                                                  maxPrestamoCalculado.text)) *
+                                          interestRate) /
+                                      (1 -
+                                          pow(1 + interestRate,
+                                              -int.parse(meses.text))))
+                                  .toString(),
+                              credito = Credito(
+                                tipoCredito: tipoCredito.text,
+                                anualInterest: calcularTEA(interestRate),
+                                term: meses.text,
+                                salarioBase: salario.text,
+                                maximoPrestamo: maxPrestamoCalculado.text,
+                                fecha: Formatter.formatDate(DateTime.now()),
+                                cuotaCredito:
+                                    Formatter.formatNumberCOP(monto.toString()),
+                                email: user.email,
+                              ),
+                              Get.to(() =>
+                                  CotizacionPage(credito: credito, user: user)),
+                              logDebug('Credito: ${credito.toJson()}'),
+                            }
+                        }),
+              )
+            ],
+          ),
         ),
       ),
     );
