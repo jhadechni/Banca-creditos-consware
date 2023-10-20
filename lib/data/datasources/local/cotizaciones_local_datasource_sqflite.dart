@@ -15,30 +15,21 @@ class CotizacionLocalDataSource {
   }
 
   _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'cotizaciones_database.db');
+    String path = join(await getDatabasesPath(), 'creditos___database.db');
     return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
 
   Future _onCreate(Database db, int version) async {
     await db.execute(
-        'CREATE TABLE cotizaciones (id INTEGER PRIMARY KEY AUTOINCREMENT, tipoCredito TEXT, salarioBase TEXT, maximoPrestamo TEXT,cuotaCredito TEXT, anualInterest TEXT, term TEXT, idUsuario INTEGER)');
+        'CREATE TABLE creditos (id INTEGER PRIMARY KEY AUTOINCREMENT, tipoCredito TEXT, salarioBase TEXT, maximoPrestamo TEXT,cuotaCredito TEXT, anualInterest TEXT, term TEXT, email TEXT, fecha TEXT)');
   }
 
-  /*
-   required this.tipoCredito,
-    required this.salarioBase,
-    required this.maximoPrestamo,
-    required this.cuotaCredito,
-    required this.anualInterest,
-    required this.term,
-    required this.idUsuario,
-  */ 
   Future<void> addCotizacion(Credito credito) async {
-    logInfo("ADD cotizacion to db");
+    logInfo("ADD credito to db");
     final db = await database;
 
     await db.insert(
-      'cotizaciones',
+      'creditos',
       credito.toJson(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -46,18 +37,20 @@ class CotizacionLocalDataSource {
     logInfo(credito.toJson());
   }
 
-
   Future<Credito> getCotizacion(int id) async {
     final db = await database;
     List<Map<String, dynamic>> cotizacion =
-        await db.query("cotizacion", where: "id = ?", whereArgs: [id]);
+        await db.query("creditos", where: "id = ?", whereArgs: [id]);
+    logDebug(cotizacion);
     return Credito.fromJson(cotizacion[0]);
   }
 
-  Future<List<Map<String, dynamic>>> getAllCotizacionesByUser(String email) async {
+  Future<List<Map<String, dynamic>>> getAllCotizacionesByUser(
+      String email) async {
     final db = await database;
-    final List<Map<String, dynamic>> cotizaciones = await db.query('cotizaciones');
-    return cotizaciones.where((cotizacion) => cotizacion['email'] == email).toList();
+    final List<Map<String, dynamic>> cotizaciones = await db.query('creditos');
+    return cotizaciones;
+    //return cotizaciones.where((cotizacion) => cotizacion['email'] == email).toList();
   }
 
   Future<void> deleteAll() async {

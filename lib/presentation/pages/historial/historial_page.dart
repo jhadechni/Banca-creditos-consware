@@ -1,10 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:loggy/loggy.dart';
 import 'package:prueba_tecnica_consware/app/util/colors.dart';
-import 'package:prueba_tecnica_consware/presentation/reusables/button.dart';
+import 'package:prueba_tecnica_consware/data/models/credito.dart';
+import 'package:prueba_tecnica_consware/presentation/controllers/user/user_controller.dart';
+import 'package:prueba_tecnica_consware/presentation/pages/cotizacion/cotizacion_page.dart';
+import 'package:prueba_tecnica_consware/presentation/pages/cotizacion/cotizacion_page_without_user.dart';
 import 'package:prueba_tecnica_consware/presentation/reusables/table.dart';
 
-class HistorialPage extends StatelessWidget {
-  const HistorialPage({super.key});
+class HistorialPage extends StatefulWidget {
+  String email;
+
+  HistorialPage({super.key, required this.email});
+
+  @override
+  State<HistorialPage> createState() => _HistorialPageState();
+}
+
+class _HistorialPageState extends State<HistorialPage> {
+  UserController userController = Get.find<UserController>();
+  List<Map<String, dynamic>> creditos = [];
+  @override
+  void initState() {
+    super.initState();
+    getCreditos().then((value) => setState(() {
+          creditos = value;
+          logDebug('creditos $creditos');
+        }));
+  }
+
+  Future<List<Map<String, dynamic>>> getCreditos() async {
+    UserController userController = Get.find<UserController>();
+    String email = await userController.getLocalEmail;
+    var creditos = await userController.getAllCreditos(email);
+    return creditos;
+  }
+
+  List<List<dynamic>> transformArray(List<Map<String, dynamic>> originalArray) {
+    return originalArray.map((item) {
+      return [
+        item['id'],
+        item['maximoPrestamo'],
+        item['fecha'],
+        item['term'],
+        item['anualInterest'],
+        // Agrega más campos según sea necesario
+      ];
+    }).toList();
+  }
+
+  List<List<dynamic>> eliminarCampo(
+      List<List<dynamic>> tabla, int indiceCampo) {
+    for (int i = 0; i < tabla.length; i++) {
+      if (indiceCampo < tabla[i].length) {
+        tabla[i].removeAt(indiceCampo);
+      }
+    }
+    return tabla;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,28 +90,24 @@ class HistorialPage extends StatelessWidget {
             const Text(
                 'Aquí encontrarás tu historial de créditos y el registro de todas tus simulaciones.',
                 style: TextStyle(fontSize: 16, color: Colors.black)),
-            const Padding(
-              padding: EdgeInsets.only(top: 17, bottom: 21),
+            Padding(
+              padding: const EdgeInsets.only(top: 17, bottom: 21),
               child: CustomTable(
-                rowNames: [
+                rowNames: const [
                   'Monto de crédito',
                   'Fecha',
                   'No. de cuotas',
                   'Interés'
                 ],
-                data: [
-                  ['12000000', '12/10/23', '10', 'abono'],
-                  ['12000000', '20', '10', 'abono'],
-                  ['12000000', '20', '10', 'abono'],
-                  ['12000000', '20', '10', 'abono'],
-                  ['12000000', '20', '10', 'abono'],
-                  ['12000000', '20', '10', 'abono'],
-                  ['12000000', '20', '10', 'abono'],
-                  ['12000000', '20', '10', 'abono'],
-                  ['12000000', '20', '10', 'abono'],
-                  ['12000000', '20', '10', 'abono'],
-                ],
-                columnTextColors: [
+                data: eliminarCampo(transformArray(creditos), 0),
+                onRowClick: (index) async {
+                  logDebug('clicked row $index');
+                  Credito cotizacion =
+                      await userController.getCotizacion(index + 1);
+                  Get.to(() => CotizacionPageNoUser(credito: cotizacion));
+                  logDebug('cotizacion $cotizacion');
+                },
+                columnTextColors: const [
                   Palette.kGray,
                   Colors.black,
                   Colors.black,

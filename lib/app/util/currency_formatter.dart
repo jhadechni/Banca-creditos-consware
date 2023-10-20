@@ -8,4 +8,8 @@ class Formatter {
   static unFormatNumberCOP(String number){
     return number.replaceAll('\$', '').replaceAll(',', '');
   }
+  static String formatDate(DateTime date) {
+  final formatter = DateFormat('yyyy-MM-dd');
+  return formatter.format(date);
+}
 }

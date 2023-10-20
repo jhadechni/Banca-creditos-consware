@@ -4,6 +4,8 @@ import 'package:prueba_tecnica_consware/app/routes/routes.dart';
 import 'package:prueba_tecnica_consware/app/util/colors.dart';
 import 'package:prueba_tecnica_consware/presentation/controllers/auth/auth_binding.dart';
 import 'package:prueba_tecnica_consware/presentation/controllers/user/user_binding.dart';
+import 'package:prueba_tecnica_consware/presentation/pages/bottom_navigation/bottom_navigation_page.dart';
+import 'package:prueba_tecnica_consware/presentation/pages/historial/historial_page.dart';
 import 'package:prueba_tecnica_consware/presentation/pages/home/home_page.dart';
 import 'package:prueba_tecnica_consware/presentation/pages/login/login_page.dart';
 
@@ -24,10 +26,7 @@ class App extends StatelessWidget {
           primarySwatch: Colors.indigo,
           fontFamily: 'ProductSans'),
       //home: const NavBar(),
-      home: Padding(
-        padding: const EdgeInsets.only(top: 50),
-        child: const HomePage(),
-      ),
+      home: NavBar(),
       getPages: appRoutes(),
     );
   }

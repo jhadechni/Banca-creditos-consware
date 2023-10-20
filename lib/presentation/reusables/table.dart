@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 
 class CustomTable extends StatelessWidget {
   final List<String> rowNames;
-  final List<List<String>> data;
+  final List<List<dynamic>> data;
   final List<Color?> columnTextColors;
+  final Function(int)? onRowClick; // Nuevo parámetro
 
   const CustomTable({
     Key? key,
     required this.rowNames,
     required this.data,
     required this.columnTextColors,
+    this.onRowClick, // Nuevo parámetro
   }) : super(key: key);
 
   @override
@@ -43,6 +45,7 @@ class CustomTable extends StatelessWidget {
           children: rowNames
               .map((name) => TableCell(
                     child: Container(
+                      alignment: Alignment.center, // Alineación centrada
                       padding: const EdgeInsets.symmetric(
                           horizontal: 7, vertical: 3),
                       child: Text(
@@ -59,14 +62,23 @@ class CustomTable extends StatelessWidget {
                 .asMap()
                 .entries
                 .map((entry) => TableCell(
-                      child: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(entry.value,
+                      child: InkWell(
+                        onTap: () {
+                          if (onRowClick != null) {
+                            onRowClick!(i);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            entry.value.toString(),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: columnTextColors[entry.key],
                                 fontSize: 12,
-                                fontWeight: FontWeight.bold)),
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
                       ),
                     ))
                 .toList(),
@@ -75,3 +87,4 @@ class CustomTable extends StatelessWidget {
     );
   }
 }
+

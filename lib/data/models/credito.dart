@@ -11,7 +11,8 @@ class Credito {
     required this.cuotaCredito,
     required this.anualInterest,
     required this.term,
-    required this.idUsuario,
+    required this.email,
+    required this.fecha
   });
 
   int? id;
@@ -20,8 +21,9 @@ class Credito {
   final String maximoPrestamo;
   final String cuotaCredito;
   final double anualInterest;
-  final int term;
-  final String idUsuario;
+  final String term;
+  final String email;
+  final String fecha;
 
   factory Credito.fromJson(Map<String, dynamic> json) =>
       _$CreditoFromJson(json);

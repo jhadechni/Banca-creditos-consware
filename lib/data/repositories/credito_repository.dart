@@ -21,4 +21,27 @@ class CreditoRepositoryIml extends CreditoRepository {
       return Future.value(false);
     }
   }
+    @override
+  Future<List<Map<String, dynamic>>> getAllCotizaciones(String email) async {
+    try {
+      logInfo('obteniendo creditos de $email en la base de datos');
+      var cotizaciones = await localDataSource.getAllCotizacionesByUser(email);
+      return Future.value(cotizaciones);
+    } catch (e) {
+      logError(e.toString());
+      return Future.error(e.toString());
+    }
+  }
+
+  @override
+  Future<Credito> getCotizacion(int id) async {
+    try {
+      logInfo('obteniendo credito con $id en la base de datos');
+      var cotizacion = await localDataSource.getCotizacion(id);
+      return Future.value(cotizacion);
+    } catch (e) {
+      logError(e.toString());
+      return Future.error(e.toString());
+    }
+  }
 }

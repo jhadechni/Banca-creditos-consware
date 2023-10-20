@@ -46,7 +46,7 @@ class _NavBarState extends State<NavBar> {
       ),
       body: <Widget>[
         const SafeArea(child: HomePage()),
-        const SafeArea(child: HistorialPage())
+         SafeArea(child: HistorialPage(email: 'jaime@jaime.com',))
       ][currentPageIndex],
     );
   }
