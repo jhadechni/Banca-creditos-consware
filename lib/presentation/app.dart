@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:prueba_tecnica_consware/app/routes/routes.dart';
 import 'package:prueba_tecnica_consware/app/util/colors.dart';
+import 'package:prueba_tecnica_consware/presentation/controllers/auth/auth_binding.dart';
 import 'package:prueba_tecnica_consware/presentation/pages/bottom_navigation/bottom_navigation_page.dart';
 import 'package:prueba_tecnica_consware/presentation/pages/cotizacion/cotizacion_page.dart';
 import 'package:prueba_tecnica_consware/presentation/pages/historial/historial_page.dart';
@@ -17,7 +18,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       initialRoute: "/",
-      //initialBinding: AuthBinding(),
+      initialBinding: AuthBinding(),
       title: 'Banca Creditos',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -25,7 +26,7 @@ class App extends StatelessWidget {
           primarySwatch: Colors.indigo,
           fontFamily: 'ProductSans'),
       //home: const NavBar(),
-      home: const LoginPage(),
+      home: const RegisterPage(),
       getPages: appRoutes(),
     );
   }

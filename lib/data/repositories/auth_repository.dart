@@ -1,11 +1,13 @@
-import '../../domain/entities/user.dart';
+import 'package:loggy/loggy.dart';
+import 'package:prueba_tecnica_consware/data/models/user.dart';
+
 import '../../domain/repositories/auth_repository.dart';
 
 class AuthenticationRepositoryIml extends AuthenticationRepository {
+
   @override
-  Future<User> signUp(String username) async {
-    //Fake sign up action
-    await Future.delayed(Duration(seconds: 1));
-    return User(username: username);
+  Future<User> signUp(User user) async {
+    logInfo('Desde repositorio ${user.toJson()}');
+    return Future.value(user);
   }
 }

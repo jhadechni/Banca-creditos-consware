@@ -76,6 +76,8 @@ class CustomInput extends StatelessWidget {
                       decoration: InputDecoration(
                         hintText: placeholder,
                         border: InputBorder.none,
+                        errorStyle: TextStyle(
+                            color: Colors.redAccent.shade700, fontSize: 0),
                       ),
                       validator: (t) {
                         if (t!.isEmpty) {
@@ -84,7 +86,7 @@ class CustomInput extends StatelessWidget {
                               snackPosition: SnackPosition.TOP,
                               backgroundColor: Palette.kPrimaryColor,
                               colorText: Colors.white);
-                          return null;
+                          return '';
                         }
                         return null;
                       },

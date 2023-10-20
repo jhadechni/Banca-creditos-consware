@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:loggy/loggy.dart';
 import 'package:prueba_tecnica_consware/app/util/colors.dart';
 import 'package:prueba_tecnica_consware/data/models/user.dart';
+import 'package:prueba_tecnica_consware/presentation/controllers/auth/auth_controller.dart';
 import 'package:prueba_tecnica_consware/presentation/reusables/button.dart';
 import 'package:prueba_tecnica_consware/presentation/reusables/checkbox.dart';
 import 'package:prueba_tecnica_consware/presentation/reusables/input.dart';
@@ -15,7 +16,8 @@ class LoginPage extends StatelessWidget {
     final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
     TextEditingController _email = TextEditingController();
     TextEditingController _password = TextEditingController();
-    User user;
+    AuthController authController = Get.find<AuthController>();
+    bool user;
 
     return Scaffold(
       body: Padding(
@@ -112,15 +114,12 @@ class LoginPage extends StatelessWidget {
                           textColor: Colors.white,
                           width: MediaQuery.of(context).size.width * 0.92,
                           height: 50,
-                          onPressed: () => {
+                          onPressed: () async => {
                                 if (_formKey.currentState!.validate())
                                   {
-                                    user = User(
-                                        id: 1,
-                                        name: 'Juan Perez',
-                                        email: _email.text,
-                                        password: _password.text),
-                                    logDebug(user.toJson().toString()),
+                                    user = await authController.logIn(
+                                        _email.text, _password.text),
+                                    print(user)
                                   }
                               })
                     ],

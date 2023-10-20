@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import '../../../data/repositories/auth_repository.dart';
-import '../../../domain/usecases/signup_use_case.dart';
+import '../../../domain/usecases/sign_up_use_case.dart';
 import 'auth_controller.dart';
 
 class AuthBinding extends Bindings {

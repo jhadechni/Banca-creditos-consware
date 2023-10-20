@@ -1,35 +1,57 @@
-import 'dart:convert';
-
 import 'package:get/get.dart';
-import '../../domain/entities/user.dart';
+import 'package:loggy/loggy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum _Key {
-  user,
-}
 
 class LocalStorageService extends GetxService {
   SharedPreferences? _sharedPreferences;
+
   Future<LocalStorageService> init() async {
     _sharedPreferences = await SharedPreferences.getInstance();
     return this;
   }
 
-  User? get user {
-    final rawJson = _sharedPreferences?.getString(_Key.user.toString());
-    if (rawJson == null) {
-      return null;
+  Future<T?> retrieveData<T>(String key) async {
+    dynamic value;
+    switch (T) {
+      case bool:
+        value = _sharedPreferences!.getBool(key);
+        logInfo("LocalPreferences getBool with key $key got $value");
+        break;
+      case double:
+        value = _sharedPreferences!.getDouble(key);
+        break;
+      case int:
+        value = _sharedPreferences!.getInt(key);
+        break;
+      case String:
+        value = _sharedPreferences!.getString(key);
+        break;
+      case List:
+        value = _sharedPreferences!.getStringList(key);
+        break;
     }
-    Map<String, dynamic> map = jsonDecode(rawJson);
-    return User.fromJson(map);
+    return value as T?;
   }
 
-  set user(User? value) {
-    if (value != null) {
-      _sharedPreferences?.setString(
-          _Key.user.toString(), json.encode(value.toJson()));
-    } else {
-      _sharedPreferences?.remove(_Key.user.toString());
+  Future<void> storeData<T>(String key, T value) async {
+    switch (T) {
+      case bool:
+        _sharedPreferences!.setBool(key, value as bool);
+        logInfo("LocalPreferences setBool with key $key got $value");
+        break;
+      case double:
+        _sharedPreferences!.setDouble(key, value as double);
+        break;
+      case int:
+        _sharedPreferences!.setInt(key, value as int);
+        break;
+      case String:
+        _sharedPreferences!.setString(key, value as String);
+        break;
+      case List:
+        _sharedPreferences!.setStringList(key, value as List<String>);
+        break;
     }
   }
 }
